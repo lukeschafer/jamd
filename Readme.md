@@ -35,6 +35,13 @@
 ## Tests
 
   Coming
+  
+## To do
+
+  * allow explicit mapping of key to source, so map require('someScript', ... to 'http://www.test.com/js/someScript.js'
+  * Tests
+  * more events? 
+  * disallow muliple concurrent attempts to load async-load a module (subsequent attempts should wait)
 
 ## License: The MIT License
 
