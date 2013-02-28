@@ -1,6 +1,6 @@
 # jam'd
 
-  jam'd stands for Javascript AMD, and is an AMD implementation aiming to provide full AMD functionality, without requiring (but supporting) scripts to actually be loaded asyncronously, or requiring any pre/post build steps.
+  jam'd (pronounced 'jammed') stands for Javascript AMD, and is an AMD implementation aiming to provide full AMD functionality, without requiring (but supporting) scripts to actually be loaded asyncronously, or requiring any pre/post build steps.
 
 ## Why?
 
