@@ -2,6 +2,9 @@
 
   jam'd stands for Javascript AMD, and is an AMD implementation aiming to provide full AMD functionality, without requiring (but supporting) scripts to actually be loaded asyncronously, or requiring any pre/post build steps.
 
+## Why?
+
+  Simply because the exact feature-set we wanted for several projects couldn't be found in existing libs. RequireJS is the best out there, but isn't quite what we want.
 
 ## Author(s)
 
