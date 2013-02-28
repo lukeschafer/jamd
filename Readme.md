@@ -20,6 +20,8 @@
 		bar.fn(); //alerts 2
     });
 
+    //note: define == jamd and require == jamd.require
+    //      define and require are only added to local scope if no existing methods exist
 ## A bit more
 
   If you require 'lib/foo' and it is not defined, jamd will try and load it from {current_path}/lib/foo.js
@@ -28,6 +30,8 @@
   
     jamd.config({scriptRoot: '/Scripts'}); //without a trailing slash
 
+  which resolves to /Scripts/lib/foo.js which, of course is from thr root of your host
+	
 ## Tests
 
   Coming
