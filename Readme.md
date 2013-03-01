@@ -25,6 +25,7 @@
 
     //note: define == jamd and require == jamd.require
     //      define and require are only added to local scope if no existing methods exist
+    
 ## A bit more
 
   If you require 'lib/foo' and it is not defined, jamd will try and load it from {current_path}/lib/foo.js
@@ -32,19 +33,23 @@
   You can change the base path by calling:
   
     jamd.config({scriptRoot: '/Scripts'}); //without a trailing slash
+  
+  You can set the default timeout period for loading scripts, default 10,000ms
+  
+    jamd.config({scriptTimeout: 2000}); // 2 seconds 
 
-  which resolves to /Scripts/lib/foo.js which, of course is from thr root of your host
+  which resolves to /Scripts/lib/foo.js which, of course is from the root of your host
 	
 ## Tests
 
-  Coming
+  QUnit, found in tests/
+  At the moment, 14 passing tests
   
 ## To do
 
   * allow explicit mapping of key to source, so map require('someScript', ... to 'http://www.test.com/js/someScript.js'
-  * Tests
   * more events? 
-  * disallow muliple concurrent attempts to load async-load a module (subsequent attempts should wait)
+  * investigate whether to disallow muliple concurrent attempts to load async-load a module (subsequent attempts should wait) - at the moment it kinda just works...
 
 ## License: The MIT License
 
