@@ -1,6 +1,9 @@
 /*
 	in-built events:
 		load: module finished loading (pretty much pointless...);
+		remove:
+	config: scriptTimeout: milliseconds to wait for script load, default 10000
+			scriptRoot: base root of all scripts
 */
 (function() {
 	var moduleCache = {};
@@ -12,6 +15,7 @@
 	window.define = window.define || jamd;
 	jamd.module = getModule;
 	jamd.config = function(cfg) {config = cfg;};
+	jamd._clear = function() { moduleCache = {}; }; //useful for tests
 	
 	function jamd(name, deps, fn) {
 		if (!(deps instanceof Array)) { fn = deps; deps=[] }
@@ -35,10 +39,11 @@
 			},
 			trigger: function(evt, paramsArray) {
 				var handlers = module._events[evt];
+				paramsArray = paramsArray || [];
 				if (!handlers) return;
 				for (var i = 0; i < handlers.length; i++) {
 					try {
-						handlers[i].apply(module.exports, paramsArray);
+						handlers[i].apply(module, paramsArray);
 					} catch (e) {
 						log ("jamd: error handling event '" + evt + "' on module '" + name + "'", e);
 					}
@@ -51,10 +56,11 @@
 				deps.push(module);
 				var ret = fn.apply(module, deps);
 				if (ret) module.exports = ret;
-				module.trigger('load');
+				module.trigger('load', [module.exports]);
 				return module.exports;
 			},
-			dependencies: module.dependencies
+			dependencies: module.dependencies,
+			module:module
 		}
 		return module;
 	}
@@ -83,12 +89,21 @@
 		var complete, s = document.createElement('script');
 		s.type = 'text/javascript';
 		s.src = (config.scriptRoot ? config.scriptRoot + '/' : '') + name + (name.indexOf('.js') > 0 ? '' : '.js');
+		var count = 0;
 		s.onload = s.onreadystatechange = function() {
 			if (!complete && (!this.readyState || this.readyState == 'complete')) {
 				complete = true;
-				setTimeout(function() {resolve(name, function(m){callback(m);})}, 1);
+				return setTimeout(done, 1);
 			}
 		};
+		function done() {
+			//try { document.body.removeChild(s); } catch(e) { log('jamd: failed removing script tag', e); }
+			resolve(name, function(m){
+				callback(m);
+			}, true)
+		}
+		setTimeout(function() { if (complete) return; done(); }, config.scriptTimeout || 10000);
+		
 		function add() {
 			if (!document.body)
 				setTimeout(add, 1);
@@ -98,9 +113,16 @@
 		add();
 	}
 	
-	function resolve(name, callback) {
+	function resolve(name, callback, failOnNoFind) {
 		var cached = moduleCache[name];
-		if (!cached) return loadAsync(name, callback);
+		if (!cached) {
+			if (failOnNoFind) {
+				callback(null);
+				log('jamd: could not find module ' + name);
+				return;
+			}
+			return loadAsync(name, callback);
+		}
 		if (cached._instance) return callback(cached._instance);
 		
 		if (!cached.dependencies.length) {
@@ -113,7 +135,8 @@
 	}
 	
 	function getModule(name) {
-		return moduleCache[name];
+		var loader = moduleCache[name];
+		return loader ? loader.module : null;
 	}
 	
 	function logAndThrow() {
