@@ -43,7 +43,8 @@
 ## Tests
 
   QUnit, found in tests/
-  At the moment, 14 passing tests
+  
+  PhantomJs in tests/phantomjs ban be used to run the qunit tests. run phantomRunner.bat
   
 ## To do
 
