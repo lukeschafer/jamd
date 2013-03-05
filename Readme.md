@@ -33,12 +33,12 @@
   You can change the base path by calling:
   
     jamd.config({scriptRoot: '/Scripts'}); //without a trailing slash
+
+  which resolves to /Scripts/lib/foo.js which, of course is from the root of your host
   
   You can set the default timeout period for loading scripts, default 10,000ms
   
     jamd.config({scriptTimeout: 2000}); // 2 seconds 
-
-  which resolves to /Scripts/lib/foo.js which, of course is from the root of your host
 	
 ## Tests
 
