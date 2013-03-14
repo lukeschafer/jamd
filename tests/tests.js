@@ -100,7 +100,7 @@ test("remove events should trigger", function() {
 
 module("async tests", { teardown: teardown });
 
-asyncTest("can load async", function() {
+asyncTest("can load async with extension", function() {
 	var start = failUnlessStarted();
 	require('test_modules/t1.js', function(t1) {
 		ok(t1.myName == 't1');
@@ -108,9 +108,17 @@ asyncTest("can load async", function() {
 	});
 });
 
+asyncTest("can load async without extension", function() {
+	var start = failUnlessStarted();
+	require('test_modules/t1', function(t1) {
+		ok(t1.myName == 't1');
+		start();
+	});
+});
+
 asyncTest("can load many async", function() {
 	var start = failUnlessStarted();
-	require('test_modules/t1.js', 'test_modules/t2.js', function(t1, t2) {
+	require('test_modules/t1', 'test_modules/t2', function(t1, t2) {
 		ok(t1.myName == 't1' && t2.myName == 't2');
 		start();
 	});
@@ -118,7 +126,7 @@ asyncTest("can load many async", function() {
 
 asyncTest("get null on async load not found", function() {
 	var start = failUnlessStarted();
-	require('test_modules/doesntexist.js', function(t1) {
+	require('test_modules/doesntexist', function(t1) {
 		ok(t1 === null);
 		start();
 	});
@@ -127,12 +135,12 @@ asyncTest("get null on async load not found", function() {
 asyncTest("multiple requires on async should load same module", function() {
 	var start = failUnlessStarted();
 	var firstFetch, secondFetch;
-	require('test_modules/t1.js', function(t1) {
+	require('test_modules/t1', function(t1) {
 		firstFetch = t1;
 		t1.first = true;
 		if (secondFetch) compare();
 	});
-	require('test_modules/t1.js', function(t1) {
+	require('test_modules/t1', function(t1) {
 		secondFetch = t1;
 		t1.second = true;
 		if (firstFetch) compare();
@@ -146,13 +154,13 @@ asyncTest("multiple requires on async should load same module", function() {
 asyncTest("multiple requires with wait on async should load same module", function() {
 	var start = failUnlessStarted();
 	var firstFetch, secondFetch;
-	require('test_modules/t1.js', function(t1) {
+	require('test_modules/t1', function(t1) {
 		firstFetch = t1;
 		t1.first = true;
 		if (secondFetch) compare();
 	});
 	setTimeout(function() {
-		require('test_modules/t1.js', function(t1) {
+		require('test_modules/t1', function(t1) {
 			secondFetch = t1;
 		t1.second = true;
 			if (firstFetch) compare();
@@ -162,6 +170,20 @@ asyncTest("multiple requires with wait on async should load same module", functi
 		ok(firstFetch === secondFetch && firstFetch.second && secondFetch.first);
 		start();
 	}
+});
+
+module("mapping tests", { teardown: teardown });
+
+asyncTest('can map a label to a source file', function () {
+	var start = failUnlessStarted();
+	
+	jamd.map('testing', 'test_modules/t1.js');
+	
+	require('testing', function(t1) {
+	debugger;
+		ok(t1.myName == 't1');
+		start();
+	});
 });
 
 function failUnlessStarted() {

@@ -8,6 +8,8 @@
 (function() {
 	var moduleCache = {};
 	var config = {};
+	var mappings = {};
+	var endsInJs = /[.]js$/ig;
 	
 	window.jamd = jamd;
 	jamd.require = require;
@@ -16,6 +18,7 @@
 	jamd.module = getModule;
 	jamd.config = function(cfg) {config = cfg;};
 	jamd._clear = function() { moduleCache = {}; }; //useful for tests
+	jamd.map = map;
 	
 	function jamd(name, deps, fn) {
 		if (!(deps instanceof Array)) { fn = deps; deps=[] }
@@ -29,7 +32,7 @@
 				module.trigger('reset', [newMod]);
 			},
 			remove: function() {
-				delete moduleCache[name];
+				delete moduleCache[(name||'').replace(endsInJs,'')];
 				module.trigger('remove');
 			},
 			on: function(evt, handler) {
@@ -51,7 +54,7 @@
 			},
 			dependencies: deps || []
 		};
-		var def = moduleCache[name] = {
+		var def = moduleCache[(name||'').replace(endsInJs,'')] = {
 			resolver: function(deps) {
 				deps.push(module);
 				var ret = fn.apply(module, deps);
@@ -86,9 +89,11 @@
 	}
 	
 	function loadAsync(name, callback) {
+		var location = mappings[name] || (config.scriptRoot ? config.scriptRoot + '/' : '') + name + (endsInJs.test(name) ? '' : '.js');
+		console.log(location);
 		var complete, s = document.createElement('script');
 		s.type = 'text/javascript';
-		s.src = (config.scriptRoot ? config.scriptRoot + '/' : '') + name + (name.indexOf('.js') > 0 ? '' : '.js');
+		s.src = location;
 		var count = 0;
 		s.onload = s.onreadystatechange = function() {
 			if (!complete && (!this.readyState || this.readyState == 'complete')) {
@@ -112,9 +117,9 @@
 		}
 		add();
 	}
-	
 	function resolve(name, callback, failOnNoFind) {
-		var cached = moduleCache[name];
+		var cached = moduleCache[(name||'').replace(endsInJs,'')];
+		
 		if (!cached) {
 			if (failOnNoFind) {
 				callback(null);
@@ -135,7 +140,7 @@
 	}
 	
 	function getModule(name) {
-		var loader = moduleCache[name];
+		var loader = moduleCache[(name||'').replace(endsInJs,'')];
 		return loader ? loader.module : null;
 	}
 	
@@ -147,5 +152,9 @@
 	
 	function log() {
 		if (console.log) console.log(arguments);
+	}
+	
+	function map(label, source) {
+		mappings[label] = source;
 	}
 })();

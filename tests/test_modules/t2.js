@@ -1,3 +1,3 @@
-define('test_modules/t2.js', function() {
+define('test_modules/t2', function() {
 	return { myName : 't2' };
 });
