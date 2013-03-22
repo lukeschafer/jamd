@@ -186,13 +186,13 @@ asyncTest('can map a label to a source file', function () {
 	});
 });
 
-function failUnlessStarted() {
+function failUnlessStarted(timeout) {
 	var called;
 	setTimeout(function() {
 		if (called) return;
 		start();
 		throw 'async test didn\'t finish';
-	}, 3000);
+	}, timeout || 3000);
 	return function() {
 		called = true;
 		start();

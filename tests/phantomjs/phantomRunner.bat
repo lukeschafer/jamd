@@ -1,2 +1,2 @@
-phantomjs phantom.js
+phantomjs phantom.js ../qunitRunner.html
 pause
