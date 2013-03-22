@@ -89,8 +89,9 @@
 	}
 	
 	function loadAsync(name, callback) {
-		var location = mappings[name] || (config.scriptRoot ? config.scriptRoot + '/' : '') + name + (endsInJs.test(name) ? '' : '.js');
-		console.log(location);
+		var location = mappings[name] || (config.scriptRoot ? config.scriptRoot + '/' : '') + name;
+		location = location + (endsInJs.test(location) ? '' : '.js');
+		
 		var complete, s = document.createElement('script');
 		s.type = 'text/javascript';
 		s.src = location;
@@ -101,13 +102,14 @@
 				return setTimeout(done, 1);
 			}
 		};
-		function done() {
-			//try { document.body.removeChild(s); } catch(e) { log('jamd: failed removing script tag', e); }
-			resolve(name, function(m){
-				callback(m);
-			}, true)
-		}
+		
 		setTimeout(function() { if (complete) return; done(); }, config.scriptTimeout || 10000);
+		
+		function done() {
+			try { document.body.removeChild(s); } catch(e) { log('jamd: failed removing script tag', e); }
+			if (mappings[name] && !moduleCache[name]) moduleCache[name] = moduleCache[mappings[name]];
+			callback();
+		}
 		
 		function add() {
 			if (!document.body)
@@ -126,7 +128,11 @@
 				log('jamd: could not find module ' + name);
 				return;
 			}
-			return loadAsync(name, callback);
+			return loadAsync(name, function done() {
+				resolve(name, function(m){
+					callback(m);
+				}, true)
+			});
 		}
 		if (cached._instance) return callback(cached._instance);
 		
@@ -155,6 +161,6 @@
 	}
 	
 	function map(label, source) {
-		mappings[label] = source;
+		mappings[label] = source.replace(endsInJs,'');
 	}
 })();

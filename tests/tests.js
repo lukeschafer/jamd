@@ -180,7 +180,6 @@ asyncTest('can map a label to a source file', function () {
 	jamd.map('testing', 'test_modules/t1.js');
 	
 	require('testing', function(t1) {
-	debugger;
 		ok(t1.myName == 't1');
 		start();
 	});
