@@ -1,6 +1,6 @@
-# jam'd
+# jamd
 
-  jam'd (pronounced 'jammed') stands for Javascript AMD, and is an AMD implementation aiming to provide full AMD functionality, without requiring (but supporting) scripts to actually be loaded asyncronously, or requiring any pre/post build steps.
+  jamd (pronounced 'jammed') stands for Javascript AMD, and is an AMD implementation aiming to provide full AMD functionality, without requiring (but supporting) scripts to actually be loaded asyncronously, or requiring any pre/post build steps.
 
 ## Why?
 
@@ -24,7 +24,7 @@
     });
 
     //note: define == jamd and require == jamd.require
-    //      define and require are only added to local scope if no existing methods exist
+    //      define and require are only added to global scope if no existing methods exist
     
 ## A bit more
 
@@ -39,18 +39,24 @@
   You can set the default timeout period for loading scripts, default 10,000ms
   
     jamd.config({scriptTimeout: 2000}); // 2 seconds 
+  
+  You can map an alias to a specific file. This is handy for asyncronously loading a module from a different server
+  
+    jamd.map('testing', 'myscripts/test.js');
+    
+  or even
+  
+    jamd.map('testing', 'http://cdn.another.domain.com/scripts/test.js');
 	
 ## Tests
 
   QUnit, found in tests/
   
-  PhantomJs in tests/phantomjs ban be used to run the qunit tests. run phantomRunner.bat
+  PhantomJs in tests/phantomjs can be used to run the qunit tests. run phantomRunner.bat
   
 ## To do
-
-  * allow explicit mapping of key to source, so map require('someScript', ... to 'http://www.test.com/js/someScript.js'
   * more events? 
-  * investigate whether to disallow muliple concurrent attempts to load async-load a module (subsequent attempts should wait) - at the moment it kinda just works...
+  * investigate whether to disallow muliple concurrent attempts to load async-load a module (subsequent attempts should wait) - at the moment it kinda just works by magic...
 
 ## License: The MIT License
 
