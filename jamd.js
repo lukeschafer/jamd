@@ -79,12 +79,16 @@
 		var deps = (args[0] instanceof Array && args.length == 2) ? args[0] : args.slice(0, args.length-1);
 		var callback = args[args.length-1];
 		
+		var finished = 0;
 		var resolved = [];
-		for (var i = 0, l = deps .length; i < l; i++) {
-			resolve(deps [i], function(m) { 
-				resolved.push(m);
-				if (deps.length == resolved.length) callback.apply(jamd, resolved);
-			});
+		for (var i = 0, l = deps.length; i < l; i++) {
+			(function(idx) {
+				resolve(deps[idx], function(m) { 
+					resolved[idx] = m;
+					finished++;
+					if (deps.length == finished) setTimeout(function() {callback.apply(jamd, resolved);}, 1);
+				});
+			})(i);
 		}
 	}
 	

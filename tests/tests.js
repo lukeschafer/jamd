@@ -3,24 +3,29 @@ jamd.config({scriptTimeout: 2000});
 
 module("basic tests", { teardown: teardown });
 
-test("can define and require a module", function() {
+asyncTest("can define and require a module", function() {
+	var start = failUnlessStarted();
 	var underTest;
 	define('foo', function() { this.exports.foo = 'foo'; });
 	require('foo', function(foo) { 
 		ok('foo' == foo.foo);
+		start();
 	});
 });
 
-test("can require many modules", function() {
+asyncTest("can require many modules", function() {
+	var start = failUnlessStarted();
 	createModule('foo');
 	createModule('bar');
 	require('foo', 'bar', function(foo, bar) {
 		ok(foo.myName == 'foo');
 		ok(bar.myName == 'bar');
+		start();
 	});
 });
 
-test("can depend on many modules", function() {
+asyncTest("can depend on many modules", function() {
+	var start = failUnlessStarted();
 	createModule('foo');
 	createModule('bar');
 	define('baz', ['foo', 'bar'], function(foo, bar) {
@@ -29,10 +34,12 @@ test("can depend on many modules", function() {
 	
 	require('baz', function(baz) {
 		ok(baz == 'foobar');
+		start();
 	});
 });
 
-test("should get module param even with dependencies", function() {
+asyncTest("should get module param even with dependencies", function() {
+	var start = failUnlessStarted();
 	createModule('foo');
 	createModule('bar');
 	define('baz', ['foo', 'bar'], function(foo, bar, module) {
@@ -41,6 +48,7 @@ test("should get module param even with dependencies", function() {
 	
 	require('baz', function(baz) {
 		ok(baz.inputModule === baz.inputModule.exports.inputModule)
+		start();
 	});
 });
 
@@ -52,48 +60,60 @@ test("can remove a module", function() {
 
 module("export tests", { teardown: teardown });
 
-test("can export via 'this'", function() {
+asyncTest("can export via 'this'", function() {
+	var start = failUnlessStarted();
 	define('foo', function() { this.exports.foo = 'foo'; });
 	require('foo', function(foo) { 
 		ok('foo' == foo.foo);
+		start();
 	});
 });
 
-test("can export via return", function() {
+asyncTest("can export via return", function() {
+	var start = failUnlessStarted();
 	define('foo', function() { return {foo : 'foo'}; });
 	require('foo', function(foo) { 
 		ok('foo' == foo.foo);
+		start();
 	});
 });
 
-test("can export via setting module.exports", function() {
+asyncTest("can export via setting module.exports", function() {
+	var start = failUnlessStarted();
 	define('foo', function(module) { module.exports = {foo : 'foo'}; });
 	require('foo', function(foo) { 
 		ok('foo' == foo.foo);
+		start();
 	});
 });
 
-test("can export via adding to module.exports", function() {
+asyncTest("can export via adding to module.exports", function() {
+	var start = failUnlessStarted();
 	define('foo', function(module) { module.exports.foo = 'foo'; });
 	require('foo', function(foo) { 
 		ok('foo' == foo.foo);
+		start();
 	});
 });
 
 module("event tests", { teardown: teardown });
 
-test("load events should trigger", function() {
+asyncTest("load events should trigger", function() {
+	var start = failUnlessStarted();
 	define('foo', function() { this.exports.foo = 'foo'; });
 	jamd.module('foo').on('load', function(foo) {
 		ok('foo' == foo.foo);
+		start();
 	});
 	require('foo', function(foo) { });
 });
 
-test("remove events should trigger", function() {
+asyncTest("remove events should trigger", function() {
+	var start = failUnlessStarted();
 	define('foo', function() { this.exports.foo = 'foo'; });
 	jamd.module('foo').on('remove', function() {
 		ok(!jamd.module('foo'));
+		start();
 	});
 	jamd.module('foo').remove();
 });
@@ -128,6 +148,16 @@ asyncTest("get null on async load not found", function() {
 	var start = failUnlessStarted();
 	require('test_modules/doesntexist', function(t1) {
 		ok(t1 === null);
+		start();
+	});
+});
+
+asyncTest("out-of-order resolves are returned in order", function() {
+	var start = failUnlessStarted();
+	define('foo', function() { this.exports.foo = 'foo'; });
+	require('test_modules/t1.js', 'foo', function(t1, foo) {
+		ok(t1.myName == 't1');
+		ok(foo.foo == 'foo');
 		start();
 	});
 });
