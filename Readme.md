@@ -4,7 +4,7 @@
 
 ## Why?
 
-  Simply because the exact feature-set we wanted for several projects couldn't be found in existing libs. RequireJS is the best out there, but isn't quite what we want.
+  Simply because the exact feature-set we wanted for several projects couldn't be found in existing libs. RequireJS is the best out there, but isn't quite what we want (support for transparent runtime module minification/combining, etc).
 
 ## Author(s)
 
@@ -13,7 +13,11 @@
 ## Quick Start
 
     define('foo', function() {
-        this.exports.value = 1
+        this.exports.value = 1;
+        //or
+        this.exports = { value: 1};
+        //or
+        return { value: 1};
     });
     define('bar', ['foo'], function(foo, module) {
         module.exports.fn = function() { alert(foo.value); };
@@ -23,23 +27,33 @@
 		bar.fn(); //alerts 2
     });
 
-    //note: define == jamd and require == jamd.require
+    //note: define === jamd and require === jamd.require
     //      define and require are only added to global scope if no existing methods exist
     
-## A bit more
+## API
 
-  If you require 'lib/foo' and it is not defined, jamd will try and load it from {current_path}/lib/foo.js
+  TIP: If you require 'lib/foo' and it is not defined, jamd will try and load it from {current_path}/lib/foo.js
+  
+### Configuration
 
-  You can change the base path by calling:
+  Usage: jamd.config({ ... });
   
-    jamd.config({scriptRoot: '/Scripts'}); //without a trailing slash
+  All options have sensible defaults.
+  
+<table>
+  <tr>
+    <th>Option</th><th>Example</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>scriptRoot</td><td>jamd.config({scriptRoot: '/Scripts'});</td><td>Changes the base path for locating modules asyncronously. **No trailing slash.**</td>
+  </tr>
+  <tr>
+    <td>scriptTimeout</td><td>jamd.config({scriptTimeout: 2000});</td><td>Set the default timeout period for loading scripts, default 10,000ms</td>
+  </tr>
+</table>
 
-  which resolves to /Scripts/lib/foo.js which, of course is from the root of your host
-  
-  You can set the default timeout period for loading scripts, default 10,000ms
-  
-    jamd.config({scriptTimeout: 2000}); // 2 seconds 
-  
+### Map
+
   You can map an alias to a specific file. This is handy for asyncronously loading a module from a different server
   
     jamd.map('testing', 'myscripts/test.js');
@@ -47,10 +61,24 @@
   or even
   
     jamd.map('testing', 'http://cdn.another.domain.com/scripts/test.js');
-	
+    
+### Events
+
+  There are several ways to bind to modules:
+  
+    define('foo', function(module) { module.on('remove', function() { /* this === foo */}) });
+    
+    jamd.module('foo').on('load', function(a, b) {});
+    
+  and to trigger manually:
+  
+    jamd.module('foo').trigger('eventname');
+    
+    jamd.module('foo').trigger('eventname', [1, 2]); //args used e.g. .on('eventname', function(a, b) {});
+    
 ## Tests
 
-  QUnit, found in tests/
+  QUnit, found in tests.js
   
   PhantomJs in tests/phantomjs can be used to run the qunit tests. run phantomRunner.bat
   
