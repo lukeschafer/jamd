@@ -17,8 +17,8 @@
 	window.define = window.define || jamd;
 	jamd.module = getModule;
 	jamd.config = function(cfg) {config = cfg;};
-	jamd._clear = function() { moduleCache = {}; }; //useful for tests
 	jamd.map = map;
+	jamd._clear = clear; //useful for tests
 	
 	function jamd(name, deps, fn) {
 		if (!(deps instanceof Array)) { fn = deps; deps=[] }
@@ -166,5 +166,14 @@
 	
 	function map(label, source) {
 		mappings[label] = source.replace(endsInJs,'');
+	}
+	
+	function clear() {
+		for(var k in moduleCache) {
+			if (moduleCache.hasOwnProperty(k) && moduleCache[k].module) {
+				moduleCache[k].module.trigger("remove");
+			}
+		}
+		moduleCache = {};
 	}
 })();

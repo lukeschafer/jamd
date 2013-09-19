@@ -118,6 +118,18 @@ asyncTest("remove events should trigger", function() {
 	jamd.module('foo').remove();
 });
 
+asyncTest("_clear should trigger remove event", function() {
+	var start = failUnlessStarted();
+	define('foo', function(module) { this.exports.foo = 'foo';
+		module.on('remove', function() {
+			ok(true);
+			start();
+		});
+	});
+	require('foo', function(foo){console.log('foo');});
+	jamd._clear();
+});
+
 module("async tests", { teardown: teardown });
 
 asyncTest("can load async with extension", function() {
