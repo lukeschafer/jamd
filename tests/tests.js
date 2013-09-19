@@ -126,7 +126,7 @@ asyncTest("_clear should trigger remove event", function() {
 			start();
 		});
 	});
-	require('foo', function(foo){console.log('foo');});
+	require('foo', function(foo){});
 	jamd._clear();
 });
 
