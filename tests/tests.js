@@ -227,6 +227,39 @@ asyncTest('can map a label to a source file', function () {
 	});
 });
 
+
+module("sync tests", { teardown: teardown });
+
+test('can resolve syncronously', function() {
+	createModule('foo');
+	createModule('bar');
+	
+	requireSync('foo', 'bar', function(foo, bar) {
+		ok(foo.myName == 'foo');
+		ok(bar.myName == 'bar');
+	});
+});
+
+test('resolveSync fails on unloaded assembly', function() {
+	createModule('foo');
+	try {
+	requireSync('foo', 'test_modules/t1', function(foo, t1) {
+	});
+	} catch (e) {
+		ok(e.indexOf('not find') > -1);
+	}
+});
+
+asyncTest('resolveSync succeeds on previously loaded async assembly', function() {
+	var start = failUnlessStarted();
+	require('test_modules/t1', function(t1) {
+		requireSync('test_modules/t1', function(t1) {
+			ok(!!t1);
+			start();
+		});	
+	});
+});
+
 function failUnlessStarted(timeout) {
 	var called;
 	setTimeout(function() {

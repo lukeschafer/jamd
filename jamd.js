@@ -13,7 +13,9 @@
 	
 	window.jamd = jamd;
 	jamd.require = require;
+	jamd.requireSync = requireSync;
 	window.require = window.require || require;
+	window.requireSync = window.requireSync || jamd.requireSync;
 	window.define = window.define || jamd;
 	jamd.module = getModule;
 	jamd.config = function(cfg) {config = cfg;};
@@ -92,6 +94,26 @@
 		}
 	}
 	
+	//requireSync('a', fn(a) {});
+	//requireSync('a','b', fn(a,b) {});
+	//requireSync(['a','b'], fn(a,b) {});
+	function requireSync() {
+		var args = Array.prototype.slice.call(arguments, 0);
+		if (args.length == 0) logAndThrow("jamd: require needs arguments");
+		if (args.length == 1 || typeof args[args.length-1] != 'function') logAndThrow("jamd: require needs at least 1 dependency and a callback");
+
+		var deps = (args[0] instanceof Array && args.length == 2) ? args[0] : args.slice(0, args.length-1);
+		var callback = args[args.length-1];
+		
+		var resolved = [];
+		for (var i = 0, l = deps.length; i < l; i++) {
+			resolve(deps[i], function(m) { 
+				resolved[i] = m;
+				if (deps.length == resolved.length) callback.apply(jamd, resolved);
+			}, true, true);
+		}
+	}
+	
 	function loadAsync(name, callback) {
 		var location = mappings[name] || (config.scriptRoot ? config.scriptRoot + '/' : '') + name;
 		location = location + (endsInJs.test(location) ? '' : '.js');
@@ -123,13 +145,14 @@
 		}
 		add();
 	}
-	function resolve(name, callback, failOnNoFind) {
+	function resolve(name, callback, failOnNoFind, errorOnNoFind) {
 		var cached = moduleCache[(name||'').replace(endsInJs,'')];
 		
 		if (!cached) {
 			if (failOnNoFind) {
-				callback(null);
 				log('jamd: could not find module ' + name);
+				if (errorOnNoFind) throw 'jamd: could not find module ' + name;
+				callback(null);
 				return;
 			}
 			return loadAsync(name, function done() {
