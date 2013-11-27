@@ -10,6 +10,7 @@
 	var config = {};
 	var mappings = {};
 	var endsInJs = /[.]js$/ig;
+	jamd.amd = { jQuery : true };
 	
 	window.jamd = jamd;
 	jamd.require = require;
